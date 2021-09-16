@@ -1,10 +1,34 @@
 import './App.css';
-import { useState } from 'react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 function App() {
   const [upperText, setUpperText] = useState('');
   const [lowerText, setLowerText] = useState('');
   const [memeChoice, setMemeChoice] = useState('');
+  const [allOptions, setAllOptions] = useState([]);
+
+  // Get all templates from the API and save all objects in allOptions array
+  const getMemesTemplates = async () => {
+    await axios
+      .get('https://api.memegen.link/templates')
+      .then((response) => {
+        setAllOptions(response.data);
+      })
+      .catch((error) =>
+        // handle error
+        console.erro(error),
+      );
+  };
+
+  // Executes getMemesTemplate function on page loading
+  useEffect(() => {
+    getMemesTemplates();
+  });
+
+  const previewMeme = () => {
+    console.log(memeChoice + ' ' + upperText + ' ' + lowerText);
+  };
 
   return (
     <div className="App">
@@ -18,8 +42,13 @@ function App() {
           list="memeOptions"
           onChange={(event) => setMemeChoice(event.target.value)}
         />
+
         <datalist id="memeOptions">
-          <option value="bender" />
+          {allOptions.map((option) => (
+            <option key={option.id} value={option.id}>
+              {option.name}
+            </option>
+          ))}
         </datalist>
         <br />
         <label htmlFor="upperText">Text:</label>
@@ -38,12 +67,10 @@ function App() {
         <br />
         <br />
 
-        <button
-          type="button"
-          onClick={() => console.log(memeChoice + upperText + lowerText)}
-        >
+        <button type="button" onClick={() => previewMeme()}>
           Preview your meme
         </button>
+
         <p>{memeChoice}</p>
         <p>{upperText}</p>
         <p>{lowerText}</p>
